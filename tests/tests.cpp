@@ -2,68 +2,80 @@
 
 #include "calculator.hpp"
 
-TEST(CalculatorImplementation, TestBasic) {
+TEST(CalculatorImplementation, TestBasic)
+{
     double expr = parse_number("1");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestLargeNumber) {
+TEST(CalculatorImplementation, TestLargeNumber)
+{
     double expr = parse_number("12345");
     EXPECT_NEAR(expr, 12345.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestDecimal) {
+TEST(CalculatorImplementation, TestDecimal)
+{
     double expr = parse_number("1.0");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingPlus) {
+TEST(CalculatorImplementation, TestWithLeadingPlus)
+{
     double expr = parse_number("+1");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingMinus) {
+TEST(CalculatorImplementation, TestWithLeadingMinus)
+{
     double expr = parse_number("-1");
     EXPECT_NEAR(expr, -1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingZeros) {
+TEST(CalculatorImplementation, TestWithLeadingZeros)
+{
     double expr = parse_number("001");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingZerosAndPlus) {
+TEST(CalculatorImplementation, TestWithLeadingZerosAndPlus)
+{
     double expr = parse_number("+001");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-
-TEST(CalculatorImplementation, TestWithLeadingZerosAndMinus) {
+TEST(CalculatorImplementation, TestWithLeadingZerosAndMinus)
+{
     double expr = parse_number("-001");
     EXPECT_NEAR(expr, -1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingPlusDecimal) {
+TEST(CalculatorImplementation, TestWithLeadingPlusDecimal)
+{
     double expr = parse_number("+1.0");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingMinusDecimal) {
+TEST(CalculatorImplementation, TestWithLeadingMinusDecimal)
+{
     double expr = parse_number("-1.0");
     EXPECT_NEAR(expr, -1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingZerosDecimal) {
+TEST(CalculatorImplementation, TestWithLeadingZerosDecimal)
+{
     double expr = parse_number("001.0");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingZerosAndPlusDecimal) {
+TEST(CalculatorImplementation, TestWithLeadingZerosAndPlusDecimal)
+{
     double expr = parse_number("+001.0");
     EXPECT_NEAR(expr, 1.0, 0.001);
 }
 
-TEST(CalculatorImplementation, TestWithLeadingZerosAndMinusDecimal) {
+TEST(CalculatorImplementation, TestWithLeadingZerosAndMinusDecimal)
+{
     double expr = parse_number("-001.0");
     EXPECT_NEAR(expr, -1.0, 0.001);
 }
