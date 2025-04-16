@@ -15,3 +15,13 @@ TEST(CalculatorImplementation, TestExamples)
     EXPECT_FALSE(validate_double("-5."));
     EXPECT_FALSE(validate_double("-5.-5"));
 }
+
+TEST(CalculatorImplementation, MoreEdgeCases)
+{
+    // empty string
+    EXPECT_FALSE(validate_double(""));
+    // trailing period
+    EXPECT_FALSE(validate_double("5."));
+    // no leading number
+    EXPECT_FALSE(validate_double(".1"));
+}
