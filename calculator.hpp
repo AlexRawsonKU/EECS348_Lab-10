@@ -3,8 +3,9 @@
 
 #include <string>
 
-// this function should expect that `expression` has already been
-// validated and thus throw no exceptions
-double parse_number(const std::string &expression);
+/**
+ * Determine if a given string is a representation of a valid double.
+ */
+bool validate_double(const std::string &expression) noexcept;
 
 #endif // __CALCULATOR_HPP
