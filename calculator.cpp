@@ -1,5 +1,12 @@
 #include "calculator.hpp"
 
+static const bool is_digit(const char c)
+{
+    // I'm pretty sure that `std::isdigit` isn't an "external library",
+    // but just in case...
+    return (c >= '0') && (c <= '9');
+}
+
 bool validate_double(const std::string &expression) noexcept
 {
     std::string::const_iterator it = expression.cbegin();
@@ -9,11 +16,11 @@ bool validate_double(const std::string &expression) noexcept
         ++it;
 
     // double always starts with a digit (after a potential sign)
-    if (!std::isdigit(*it))
+    if (!is_digit(*it))
         return false;
 
     // consume up until the separator or end of the string
-    while (++it != expression.cend() && std::isdigit(*it))
+    while (++it != expression.cend() && is_digit(*it))
         continue;
 
     // if this is the end of the string, we're done
@@ -30,7 +37,7 @@ bool validate_double(const std::string &expression) noexcept
     // everything after the separator must be a digit
     do
     {
-        if (!std::isdigit(*it))
+        if (!is_digit(*it))
             return false;
     } while (++it != expression.cend());
 

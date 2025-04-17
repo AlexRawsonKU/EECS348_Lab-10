@@ -24,4 +24,9 @@ TEST(CalculatorImplementation, MoreEdgeCases)
     EXPECT_FALSE(validate_double("5."));
     // no leading number
     EXPECT_FALSE(validate_double(".1"));
+    // check every digit
+    EXPECT_TRUE(validate_double("12345.6789"));
+    // check near misses for valid characters
+    EXPECT_FALSE(validate_double("/")); // ord('0') - 1
+    EXPECT_FALSE(validate_double(":")); // ord('9') + 1
 }
