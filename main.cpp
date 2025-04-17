@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
     {
         if (validate_double(line))
         {
-            std::cout << line << " is valid double" << std::endl;
+            std::string rhs = "-123.456";
+            std::cout << line << " is valid double (" << line << " + " << rhs << " = " << add_doubles(line, rhs) << ")" << std::endl;
         }
         else
         {
