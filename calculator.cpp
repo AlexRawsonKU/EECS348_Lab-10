@@ -5,21 +5,11 @@
 /**
  * Checks if `c` is a character representing a valid ASCII digit.
  */
-static const bool is_digit(const char c)
+static bool is_digit(const char c)
 {
     // I'm pretty sure that `std::isdigit` isn't an "external library",
     // but just in case...
     return (c >= '0') && (c <= '9');
-}
-
-/**
- * Adds two characters representing digits (along with a carry digit).
- */
-static char add_digits(char c1, char c2, char &carry)
-{
-    char sum = (c1 - '0') + (c2 - '0') + (carry - '0');
-    carry = (sum / 10) + '0';
-    return (sum % 10) + '0';
 }
 
 /**
@@ -114,128 +104,87 @@ bool validate_double(const std::string &expression) noexcept
     return true;
 }
 
-/**
- * Subtract `lhs - rhs`.
- *
- * The numbers must not have signs,
- * and the strings must have a matching number of characters on each side of their respective decimal point.
- */
-static std::string sub_doubles(std::string lhs, std::string rhs)
-{
-
-    return "0.0";
-}
-
-/**
- * Add two strings as decimals.
- *
- * This function was primarily by ChatGPT due to time constraints (with modifications).
- */
-static std::string addDecimalStrings(const std::string &num1, const std::string &num2)
-{
-    // figure out which/if either of the numbers are negative
-    bool isNegative1 = (num1[0] == '-');
-    bool isNegative2 = (num2[0] == '-');
-
-    // remove the sign from either string, since we don't need it
-    std::string str1 = is_digit(num1.front()) ? num1 : num1.substr(1);
-    std::string str2 = is_digit(num2.front()) ? num2 : num2.substr(1);
-
-    // locate the decimal separators in each string
-    size_t lhs_dec_idx = str1.find('.');
-    size_t rhs_dec_idx = str2.find('.');
-
-    // make sure that if there wasn't a decimal point so that indices are still valid
-    if (lhs_dec_idx == std::string::npos)
-        lhs_dec_idx = str1.length();
-    if (rhs_dec_idx == std::string::npos)
-        rhs_dec_idx = str2.length();
-
-    // make sure that the number of digits after the decimal matches
-    size_t maxDecimalPlaces = std::max(str1.length() - lhs_dec_idx, str2.length() - rhs_dec_idx) - 1;
-    if (str1.length() - lhs_dec_idx - 1 < maxDecimalPlaces)
-        str1.append(maxDecimalPlaces - (str1.length() - lhs_dec_idx - 1), '0');
-    if (str2.length() - rhs_dec_idx - 1 < maxDecimalPlaces)
-        str2.append(maxDecimalPlaces - (str2.length() - rhs_dec_idx - 1), '0');
-
-    // now make sure they match before the decimal too
-    size_t maxIntLength = std::max(lhs_dec_idx, rhs_dec_idx);
-    str1.insert(0, maxIntLength - lhs_dec_idx, '0');
-    str2.insert(0, maxIntLength - rhs_dec_idx, '0');
-
-    // when the signs are different, do subtraction
-    if (isNegative1 != isNegative2)
-    {
-        // always subtract `larger - smaller` and fix sign later
-        bool isFirstLarger = (str1 > str2); // character-by-character compare actually does work
-        if (!isFirstLarger)
-            std::swap(str1, str2);
-
-        int carry = 0;
-        std::string result;
-        size_t len = str1.size();
-
-        // do the subtraction
-        for (int i = len - 1; i >= 0; --i)
-        {
-            int digit1 = str1[i] - '0';
-            int digit2 = (i < str2.size()) ? str2[i] - '0' : 0;
-            int diff = digit1 - digit2 - carry;
-            carry = (diff < 0) ? 1 : 0; // overflowed, carry a -1
-            if (carry)
-                diff += 10; // bring the different back into range
-
-            result.push_back('0' + diff);
-        }
-
-        // put the string back in order
-        std::reverse(result.begin(), result.end());
-
-        // the decimal point is still needed
-        result.insert(result.size() - maxDecimalPlaces, 1, '.');
-
-        // add the sign correctly
-        if (!isFirstLarger)
-            result.insert(0, 1, '-');
-
-        // done subtracting
-        return result;
-    }
-
-    // signs match, addition will work
-    int carry = 0;
-    std::string result;
-    size_t len = std::max(str1.size(), str2.size());
-
-    for (int i = len - 1; i >= 0; --i)
-    {
-        int digit1 = (i < str1.size()) ? str1[i] - '0' : 0;
-        int digit2 = (i < str2.size()) ? str2[i] - '0' : 0;
-        int sum = digit1 + digit2 + carry;
-        carry = sum / 10;
-        result.push_back('0' + (sum % 10));
-    }
-
-    // If there is a carry left over
-    if (carry)
-        result.push_back('0' + carry);
-
-    std::reverse(result.begin(), result.end());
-
-    // Place the decimal point back
-    result.insert(result.size() - maxDecimalPlaces, 1, '.');
-
-    // Add negative sign if both numbers were negative
-    if (isNegative1 && isNegative2)
-    {
-        result.insert(0, 1, '-');
-    }
-
-    return result;
-}
-
 std::string add_doubles(std::string lhs, std::string rhs)
 {
-    // separate ChatGPT function out due to shame
-    return addDecimalStrings(lhs, rhs);
+    // prep the LHS
+    ensure_signed(lhs);
+    size_t lhs_integer = 0, lhs_decimal = 0;
+    part_lengths(lhs, lhs_integer, lhs_decimal);
+
+    // prep the RHS
+    ensure_signed(rhs);
+    size_t rhs_integer = 0, rhs_decimal = 0;
+    part_lengths(rhs, rhs_integer, rhs_decimal);
+
+    // pad each side as needed
+    zeropad_number(lhs, std::max(lhs_integer, rhs_integer), std::max(lhs_decimal, rhs_decimal));
+    zeropad_number(rhs, std::max(lhs_integer, rhs_integer), std::max(lhs_decimal, rhs_decimal));
+
+    // check the signs
+    if (lhs.front() == rhs.front())
+    {
+        // the signs match, do decimal addition
+        signed char carry = 0;
+        std::string sum;
+        for (size_t idx = lhs.length() - 1; idx > 0; idx--)
+        {
+            if (lhs[idx] == '.')
+            {
+                sum.push_back('.');
+                continue;
+            }
+            char result = (lhs[idx] - '0') + (rhs[idx] - '0') + carry;
+            carry = result / 10;
+            sum.push_back((result % 10) + '0');
+        }
+        if (carry != 0)
+        {
+            sum.push_back(carry + '0'); // if there's more carry, add it
+        }
+        sum.push_back(lhs.front());           // save the sign
+        std::reverse(sum.begin(), sum.end()); // fix the order
+        return sum;
+    }
+    else
+    {
+        // the signs differ, so we need subtraction
+        // ensure the subtraction is in order (i.e. `a + -b => a - b`, `-a + b => b - a`)
+        bool lhs_is_positive = lhs.front() == '+';
+        if (!lhs_is_positive)
+            std::swap(lhs, rhs);
+        // remove the signs from the numbers to make the math easier
+        lhs.replace(0, 1, " ");
+        rhs.replace(0, 1, " ");
+        // if the result is going to be negative, we need to subtract "backwards"
+        bool result_is_negative = lhs < rhs; // comparing the strings left-to-right by byte value works due to 0-padding
+        if (result_is_negative)
+            std::swap(lhs, rhs); // make sure the results are in order
+
+        signed char carry = 0;
+        std::string difference;
+        for (size_t idx = lhs.length() - 1; idx > 0; idx--)
+        {
+            if (lhs[idx] == '.')
+            {
+                difference.push_back('.');
+                continue;
+            }
+            signed char result = (lhs[idx] - '0') - (rhs[idx] - '0') + carry;
+            carry = result / 10;
+            // make sure the digit is positive
+            if (result < 0)
+                result += (carry * 10);
+            difference.push_back(result + '0');
+        }
+        if (carry != 0)
+        {
+            difference.push_back(std::abs(carry) + '0');
+        }
+        if (result_is_negative)
+        {
+            difference.push_back('-');
+        }
+        std::reverse(difference.begin(), difference.end()); // fix the order
+        return difference;
+    }
 }
